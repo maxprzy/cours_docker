@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  
+  web:
+    container_name: messites
+    image: web
+    ports:
+      - "8080:8080"
+      - "80:80"
+    volumes:
+      - type: bind
+        source: ./nginx/code/html
+        target: /wiki
+      - type: bind
+        source: ./nginx/code/intra
+        target: /intra
+    networks:
+      - zeneca
+
+  dns:
+    container_name: mondns
+    image: dns
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "10000:10000"
+    volumes:
+      - type: bind
+        source: ./bind/data
+        target: /data
+    networks:
+      - zeneca
+
+  ftp:
+    container_name: transfert_code
+    image: bogem/ftp
+    volumes:
+      - type: bind
+        source: ./nginx/code
+        target: /home/vsftpd
+    ports:
+      - "20:20"
+      - "21:21"
+      - "47400-47470:47400-47470"
+    environment:
+      - FTP_USER=dev
+      - FTP_PASS=cisco
+      - PASV_ADDRESS= 192.168.70.31
+    networks:
+      - zeneca
+
+networks:
+  zeneca:
